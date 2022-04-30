@@ -1,0 +1,65 @@
+version: '3.8'
+volumes:
+    data:
+    pgadmin-conf:
+
+services:
+  postgres:
+    hostname: core_postgres
+    container_name: core_postgres
+    build:
+      dockerfile: Dockerfile.pgsql
+      context: .
+    
+    restart: always
+    environment:
+      - POSTGRES_USER:postgres
+      - POSTGRES_PASSWORD:postgres
+      - POSTGRES_HOST_AUTH_METHOD=trust
+      - POSTGRES_INITDB_ARGS:"--LANG=pt_BR.utf8 --lc-collate=pt_BR.ISO-8859-1 --lc-ctype=pt_BR.ISO-8859-1"
+
+    ports:
+      - "15432:5432"
+    volumes:
+      - data:/var/lib/postgresql/data
+
+    networks:
+      - switch
+      
+  pgamdin4:
+     hostname: core_pgadmin4
+     container_name: core_pgadmin4
+     image: dpage/pgadmin4
+     environment:
+       PGADMIN_DEFAULT_EMAIL: "csc@smce.com.br"
+       PGADMIN_DEFAULT_PASSWORD: "70conectar"
+     ports:
+       - "16543:80"
+     depends_on:
+       - postgres
+     networks:
+       - switch
+     volumes:
+      - pgadmin-conf:/var/lib/pgadmin
+
+  nodereact:
+    hostname: core_nodereact
+    container_name: core_nodereact
+    build:
+      context: .
+      dockerfile: Dockerfile.node
+    command:  npm start
+    environment:
+      NODE_ENV: development
+    ports:
+      - 3000:3000
+    networks:
+      - switch
+    volumes:
+     - .:/app/core
+     - /app/core/node_modules
+
+ 
+networks: 
+  switch:
+    driver: bridge

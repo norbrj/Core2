@@ -1,0 +1,30 @@
+FROM node:alpine
+
+# Diretório de trabalho(é onde a aplicação ficará dentro do container).
+WORKDIR /app/core
+
+
+ENV PATH /app/core/node_modules/.bin:$PATH
+COPY package.json /app/core/package.json
+
+RUN npm config set unsafe-perm true
+
+RUN apk update && apk upgrade && apk add git 
+# && npx create-react-app core && npm install -g npm@8.8.0
+# RUN npm i --package-lock-only && npm cache clean --force && npm fund
+# RUN npm install
+
+
+### TENTAR
+RUN mkdir -p node_modules/.cache && chmod -R 777 node_modules/.cache
+
+
+RUN npm install --silent && npm install -g npm@8.8.0 --silent
+RUN npm install react-scripts@5.0.1 -g --silent
+
+# RUN npm audit fix --force
+
+# RUN mkdir /core/j
+
+# Inicializa a aplicação
+CMD ["npm", "start"]
